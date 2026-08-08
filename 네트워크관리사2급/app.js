@@ -37,12 +37,15 @@ async function loadData() {
 
 
 function cleanText(text) {
-    return String(text || "")
-        .replace(/^[\t ]+/gm, "")
-        .replace(/[ \t]+$/gm, "")
+    return String(text ?? "")
+        .replace(/\u00A0/g, " ")
+        .replace(/\u200B/g, "")
+        .split(/\r?\n/)
+        .map(line => line.trim())
+        .filter(line => line !== "")
+        .join("\n")
         .trim();
 }
-
 
 /* 과목 버튼 만들기 */
 function createSubjectButtons(sheet9) {
