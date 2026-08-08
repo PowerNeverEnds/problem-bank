@@ -27,6 +27,12 @@ async function loadData() {
     }
 }
 
+function cleanText(text) {
+    return String(text || "")
+        .replace(/^[\t ]+/gm, "")
+        .replace(/[ \t]+$/gm, "")
+        .trim();
+}
 
 function displayProblems(
     sheet9,
@@ -73,7 +79,7 @@ function displayProblems(
             </div>
 
             <div class="question">
-                ${problem["문제만"] || ""}
+                ${cleanText(problem["문제만"])}
             </div>
 
             ${
