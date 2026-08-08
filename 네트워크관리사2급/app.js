@@ -2,6 +2,10 @@ const API_URL =
   "https://script.google.com/macros/s/AKfycbyg24xu-D-rWfhTNx7GQeDaP2Ut8MP8uGNh57gdIhoLtLxbxtd96B5UZHwJfLMsOSem/exec";
 
 
+let allData = {};
+let selectedSubject = "전체";
+
+
 async function loadData() {
     try {
         const response = await fetch(API_URL);
@@ -11,6 +15,10 @@ async function loadData() {
         }
 
         const data = await response.json();
+
+        allData = data;
+
+        createSubjectButtons(data["시트9"]);
 
         displayProblems(
             data["시트9"],
@@ -27,6 +35,7 @@ async function loadData() {
     }
 }
 
+
 function cleanText(text) {
     return String(text || "")
         .replace(/^[\t ]+/gm, "")
@@ -34,15 +43,81 @@ function cleanText(text) {
         .trim();
 }
 
+
+/* 과목 버튼 만들기 */
+function createSubjectButtons(sheet9) {
+
+    const subjects = [
+        ...new Set(
+            sheet9
+                .map(row => row["과목"])
+                .filter(subject => subject)
+        )
+    ];
+
+    const menu = document.getElementById("subject-menu");
+
+    menu.innerHTML = "";
+
+    /* 전체 버튼 */
+    const allButton = document.createElement("button");
+
+    allButton.textContent = "전체";
+
+    allButton.onclick = () => {
+        selectedSubject = "전체";
+
+        displayProblems(
+            allData["시트9"],
+            allData["문제DB"],
+            allData["해설DB"],
+            allData["문제별해설DB"]
+        );
+    };
+
+    menu.appendChild(allButton);
+
+
+    /* 과목별 버튼 */
+    subjects.forEach(subject => {
+
+        const button = document.createElement("button");
+
+        button.textContent = subject;
+
+        button.onclick = () => {
+
+            selectedSubject = subject;
+
+            const filtered = allData["시트9"].filter(
+                row => row["과목"] === subject
+            );
+
+            displayProblems(
+                filtered,
+                allData["문제DB"],
+                allData["해설DB"],
+                allData["문제별해설DB"]
+            );
+        };
+
+        menu.appendChild(button);
+    });
+}
+
+
+/* 문제 출력 */
 function displayProblems(
     sheet9,
     problemDB,
     explanationDB,
     individualDB
 ) {
+
     const container = document.getElementById("problem-list");
 
     container.innerHTML = "";
+
 
     sheet9.forEach(row => {
 
@@ -51,25 +126,31 @@ function displayProblems(
         const source = row["출처"];
         const problemID = row["문제ID"];
 
+
         const problem = problemDB.find(
             p => String(p["문제ID"]) === String(problemID)
         );
 
         if (!problem) return;
 
+
         const explanation = explanationDB.find(
             e => String(e["해설ID"]) === String(problem["해설ID"])
         );
+
 
         const individual = individualDB.find(
             e => String(e["문제ID"]) === String(problemID)
         );
 
+
         const div = document.createElement("div");
 
         div.className = "problem";
 
+
         div.innerHTML = `
+
             <div class="info">
                 ${subject} · ${count}회 출제
                 <br>
@@ -78,56 +159,85 @@ function displayProblems(
                 문제ID: ${problemID}
             </div>
 
+
             <div class="question">
                 ${cleanText(problem["문제만"])}
             </div>
 
+
             ${
                 problem["사진"]
-                ? `<img src="images/${problem["사진"]}"
-                        style="max-width:100%; margin-top:15px;">`
+                ? `
+                    <img
+                        src="images/${problem["사진"]}"
+                        style="max-width:100%; margin-top:15px;"
+                    >
+                `
                 : ""
             }
 
+
             <div class="choices">
-                <div>① ${problem["보기1"] || ""}</div>
-                <div>② ${problem["보기2"] || ""}</div>
-                <div>③ ${problem["보기3"] || ""}</div>
-                <div>④ ${problem["보기4"] || ""}</div>
+
+                <div>① ${cleanText(problem["보기1"])}</div>
+
+                <div>② ${cleanText(problem["보기2"])}</div>
+
+                <div>③ ${cleanText(problem["보기3"])}</div>
+
+                <div>④ ${cleanText(problem["보기4"])}</div>
+
             </div>
-            
+
+
             <div class="answer">
                 정답: ${problem["정답"] || ""}
             </div>
+
 
             ${
                 explanation
                 ? `
                     <div class="explanation">
+
                         <h3>공통 해설</h3>
-                        <div>${explanation["공통해설"] || ""}</div>
+
+                        <div>
+                            ${explanation["공통해설"] || ""}
+                        </div>
 
                         <div class="tip">
-                            꿀팁: ${explanation["꿀팁"] || ""}
+                            꿀팁:
+                            ${explanation["꿀팁"] || ""}
                         </div>
+
                     </div>
                 `
                 : ""
             }
+
 
             ${
                 individual
                 ? `
                     <div class="explanation">
+
                         <h3>문제별 해설</h3>
-                        <div>${individual["문제별해설"] || ""}</div>
+
+                        <div>
+                            ${individual["문제별해설"] || ""}
+                        </div>
+
                     </div>
                 `
                 : ""
             }
+
         `;
 
+
         container.appendChild(div);
+
     });
 }
 
