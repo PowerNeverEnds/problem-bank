@@ -84,9 +84,12 @@ function displayProblems(
             }
 
             <div class="choices">
-                ${problem["보기"] || ""}
+                <div>① ${problem["보기1"] || ""}</div>
+                <div>② ${problem["보기2"] || ""}</div>
+                <div>③ ${problem["보기3"] || ""}</div>
+                <div>④ ${problem["보기4"] || ""}</div>
             </div>
-
+            
             <div class="answer">
                 정답: ${problem["정답"] || ""}
             </div>
