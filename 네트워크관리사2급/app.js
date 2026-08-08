@@ -73,7 +73,7 @@ function displayProblems(
             </div>
 
             <div class="question">
-                ${problem["문제"] || ""}
+                ${problem["문제만"] || ""}
             </div>
 
             ${
