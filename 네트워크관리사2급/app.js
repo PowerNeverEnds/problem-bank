@@ -590,10 +590,10 @@ function displayKeywordPage(
     content.className =
         "keyword-theory";
 
-    content.innerHTML =
-        renderTheory(
-            keyword["이론내용"] || ""
-        );
+    renderTheory(
+      content,
+      keyword["이론내용"] || ""
+    );
 
 
     theory.appendChild(title);
