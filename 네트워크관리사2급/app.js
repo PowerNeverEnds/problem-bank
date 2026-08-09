@@ -4,6 +4,7 @@ const API_URL =
 
 let allData = {};
 let selectedSubject = "전체";
+let selectedCounts = ["all"];
 
 
 async function loadData() {
@@ -19,13 +20,9 @@ async function loadData() {
         allData = data;
 
         createSubjectButtons(data["시트9"]);
+        createCountFilter();
 
-        displayProblems(
-            data["시트9"],
-            data["문제DB"],
-            data["해설DB"],
-            data["문제별해설DB"]
-        );
+        refreshProblems();
 
     } catch (error) {
         console.error(error);
@@ -69,15 +66,7 @@ function createSubjectButtons(sheet9) {
 
     allButton.onclick = () => {
         selectedSubject = "전체";
-      
-        document.getElementById("keyword-menu").innerHTML = "";
-
-        displayProblems(
-            allData["시트9"],
-            allData["문제DB"],
-            allData["해설DB"],
-            allData["문제별해설DB"]
-        );
+        refreshProblems();
     };
 
     menu.appendChild(allButton);
@@ -91,25 +80,121 @@ function createSubjectButtons(sheet9) {
         button.textContent = subject;
 
         button.onclick = () => {
+          selectedSubject = subject;
 
-            selectedSubject = subject;
-          
-            createKeywordButtons(subject);
-
-            const filtered = allData["시트9"].filter(
-                row => row["과목"] === subject
-            );
-
-            displayProblems(
-                filtered,
-                allData["문제DB"],
-                allData["해설DB"],
-                allData["문제별해설DB"]
-            );
+          refreshProblems();
         };
 
         menu.appendChild(button);
     });
+}
+
+function createCountFilter() {
+
+    const container = document.getElementById("count-filter");
+
+    const checkboxes = container.querySelectorAll(
+        'input[type="checkbox"]'
+    );
+
+    checkboxes.forEach(checkbox => {
+
+        checkbox.addEventListener("change", () => {
+
+            if (checkbox.value === "all") {
+
+                if (checkbox.checked) {
+
+                    checkboxes.forEach(cb => {
+                        cb.checked = cb.value === "all";
+                    });
+
+                    selectedCounts = ["all"];
+
+                } else {
+
+                    // 전체를 해제했는데 아무것도 없으면 전체로 복귀
+                    const othersChecked =
+                        [...checkboxes]
+                        .some(cb => cb.value !== "all" && cb.checked);
+
+                    if (!othersChecked) {
+                        checkbox.checked = true;
+                        selectedCounts = ["all"];
+                    }
+
+                }
+
+            } else {
+
+                const checked = [...checkboxes]
+                    .filter(cb =>
+                        cb.value !== "all" && cb.checked
+                    )
+                    .map(cb => cb.value);
+
+                if (checked.length === 0) {
+
+                    checkboxes.forEach(cb => {
+                        cb.checked = cb.value === "all";
+                    });
+
+                    selectedCounts = ["all"];
+
+                } else {
+
+                    checkboxes.forEach(cb => {
+                        if (cb.value === "all") {
+                            cb.checked = false;
+                        }
+                    });
+
+                    selectedCounts = checked;
+                }
+            }
+
+            refreshProblems();
+        });
+    });
+}
+
+function refreshProblems() {
+
+    let filtered = allData["시트9"];
+
+    // 과목 필터
+    if (selectedSubject !== "전체") {
+        filtered = filtered.filter(
+            row => row["과목"] === selectedSubject
+        );
+    }
+
+    // 출제 횟수 필터
+    if (!selectedCounts.includes("all")) {
+
+        filtered = filtered.filter(row => {
+
+            const count = Number(row["횟수"]);
+
+            return selectedCounts.some(value => {
+
+                if (value === "4") {
+                    return count >= 4;
+                }
+
+                return count === Number(value);
+
+            });
+
+        });
+    }
+
+    displayProblems(
+        filtered,
+        allData["문제DB"],
+        allData["해설DB"],
+        allData["문제별해설DB"]
+    );
 }
 
 function createKeywordButtons(subject) {
