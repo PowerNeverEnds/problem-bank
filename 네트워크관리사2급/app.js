@@ -69,6 +69,8 @@ function createSubjectButtons(sheet9) {
 
     allButton.onclick = () => {
         selectedSubject = "전체";
+      
+        document.getElementById("keyword-menu").innerHTML = "";
 
         displayProblems(
             allData["시트9"],
@@ -91,6 +93,8 @@ function createSubjectButtons(sheet9) {
         button.onclick = () => {
 
             selectedSubject = subject;
+          
+            createKeywordButtons(subject);
 
             const filtered = allData["시트9"].filter(
                 row => row["과목"] === subject
@@ -108,6 +112,47 @@ function createSubjectButtons(sheet9) {
     });
 }
 
+function createKeywordButtons(subject) {
+
+    const menu = document.getElementById("keyword-menu");
+
+    menu.innerHTML = "";
+
+    const keywordDB = allData["키워드DB"];
+
+    if (!keywordDB) return;
+
+    const keywords = keywordDB.filter(
+        row => row["과목"] === subject
+    );
+
+    if (keywords.length === 0) {
+        return;
+    }
+
+    const title = document.createElement("div");
+    title.textContent = "키워드";
+    menu.appendChild(title);
+
+    keywords.forEach(keyword => {
+
+        const button = document.createElement("button");
+
+        button.textContent = keyword["키워드"];
+
+        button.onclick = () => {
+            displayKeyword(
+                keyword,
+                allData["시트9"],
+                allData["문제DB"],
+                allData["해설DB"],
+                allData["문제별해설DB"]
+            );
+        };
+
+        menu.appendChild(button);
+    });
+}
 
 /* 문제 출력 */
 function displayProblems(
