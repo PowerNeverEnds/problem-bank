@@ -69,33 +69,61 @@ function cleanText(text) {
    [[IMG:파일명.png]]
    ========================= */
 
-function renderTheory(text) {
+function renderTheory(container, text) {
 
-    let html = cleanText(text);
+    const rawText = String(text ?? "")
+        .replace(/\u00A0/g, " ")
+        .replace(/\u200B/g, "");
 
+    const parts = rawText.split(/(\[\[IMG:[^\]]+\]\])/g);
 
-    html = html.replace(
-        /\[\[IMG:([^\]]+)\]\]/g,
-        (match, filename) => {
+    parts.forEach(part => {
 
-            return `
-                <img
-                    src="images/${filename}"
-                    style="max-width:100%; margin:15px 0;"
-                    alt="${filename}"
-                >
-            `;
+        const imageMatch =
+            part.match(/^\[\[IMG:([^\]]+)\]\]$/);
+
+        /* 이미지 */
+        if (imageMatch) {
+
+            const img =
+                document.createElement("img");
+
+            img.src =
+                "images/" + imageMatch[1];
+
+            img.alt =
+                imageMatch[1];
+
+            img.style.maxWidth =
+                "100%";
+
+            img.style.margin =
+                "15px 0";
+
+            container.appendChild(img);
 
         }
-    );
 
+        /* 일반 글 */
+        else if (part.trim() !== "") {
 
-    html = html.replace(/\n/g, "<br>");
+            const textNode =
+                document.createElement("div");
 
+            textNode.textContent =
+                part.trim();
 
-    return html;
+            textNode.style.whiteSpace =
+                "pre-wrap";
+
+            container.appendChild(textNode);
+
+        }
+
+    });
 
 }
+
 
 
 /* =========================
