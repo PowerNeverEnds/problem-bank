@@ -439,6 +439,33 @@ function refreshProblems() {
         );
 
     }
+  if (selectedKeyword) {
+
+    const keyword = allData["키워드DB"].find(
+        row =>
+            String(row["키워드ID"]).trim() ===
+            String(selectedKeyword).trim()
+    );
+
+    displayKeywordPage(
+        keyword,
+        filtered,
+        allData["문제DB"],
+        allData["해설DB"],
+        allData["문제별해설DB"]
+    );
+
+} else {
+
+    displayProblems(
+        filtered,
+        allData["문제DB"],
+        allData["해설DB"],
+        allData["문제별해설DB"]
+    );
+
+  }
+  
 
 }
 
