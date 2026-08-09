@@ -196,38 +196,44 @@ function displayProblems(
             </div>
 
 
-            ${
-                explanation
-                ? `
-                    <div class="explanation">
-
-                        <h3>공통 해설</h3>
-
-                        <div>${cleanText(explanation["공통해설"])}</div>
-
-                        <div class="tip">꿀팁: ${cleanText(explanation["꿀팁"])}</div>
-
-                    </div>
-                `
-                : ""
-            }
-
-
-            ${
-                individual
-                ? `
-                    <div class="explanation">
-
-                        <h3>문제별 해설</h3>
-
-                        <div>${cleanText(individual["문제별해설"])}</div>
-
-                    </div>
-                `
-                : ""
-            }
+            
 
         `;
+        if (explanation) {
+            const explanationDiv = document.createElement("div");
+            explanationDiv.className = "explanation";
+
+            const title = document.createElement("h3");
+            title.textContent = "공통 해설";
+
+            const content = document.createElement("div");
+            content.textContent = cleanText(explanation["공통해설"]);
+
+            const tip = document.createElement("div");
+            tip.className = "tip";
+            tip.textContent = "꿀팁: " + cleanText(explanation["꿀팁"]);
+
+            explanationDiv.appendChild(title);
+            explanationDiv.appendChild(content);
+            explanationDiv.appendChild(tip);
+
+            div.appendChild(explanationDiv);
+        }
+        if (individual) {
+            const individualDiv = document.createElement("div");
+            individualDiv.className = "explanation";
+
+            const title = document.createElement("h3");
+            title.textContent = "문제별 해설";
+
+            const content = document.createElement("div");
+            content.textContent = cleanText(individual["문제별해설"]);
+
+            individualDiv.appendChild(title);
+            individualDiv.appendChild(content);
+
+            div.appendChild(individualDiv);
+        }
 
 
         container.appendChild(div);
