@@ -335,19 +335,16 @@ function updateCountCheckboxes() {
 
 function refreshProblems() {
 
-    let filtered =
-        allData["시트9"];
+    let filtered = allData["시트9"];
 
 
     /* 과목 필터 */
 
     if (selectedSubject !== "전체") {
 
-        filtered =
-            filtered.filter(
-                row =>
-                    row["과목"] === selectedSubject
-            );
+        filtered = filtered.filter(
+            row => row["과목"] === selectedSubject
+        );
 
     }
 
@@ -356,35 +353,92 @@ function refreshProblems() {
 
     if (!selectedCounts.includes("all")) {
 
-        filtered =
-            filtered.filter(row => {
+        filtered = filtered.filter(row => {
 
-                const count =
-                    Number(row["횟수"]);
+            const count = Number(row["횟수"]);
 
+            return selectedCounts.some(value => {
 
-                return selectedCounts.some(value => {
+                if (value === "4") {
+                    return count >= 4;
+                }
 
-                    if (value === "4") {
-                        return count >= 4;
-                    }
-
-
-                    return count === Number(value);
-
-                });
+                return count === Number(value);
 
             });
+
+        });
 
     }
 
 
-    displayProblems(
-        filtered,
-        allData["문제DB"],
-        allData["해설DB"],
-        allData["문제별해설DB"]
-    );
+    /* =========================
+       키워드 필터
+       ========================= */
+
+    if (selectedKeyword) {
+
+        const keywordProblemIDs =
+            allData["문제DB"]
+                .filter(problem => {
+
+                    const ids = String(
+                        problem["키워드ID"] || ""
+                    )
+                    .split(",")
+                    .map(id => id.trim());
+
+                    return ids.includes(
+                        String(selectedKeyword).trim()
+                    );
+
+                })
+                .map(problem =>
+                    String(problem["문제ID"])
+                );
+
+
+        filtered = filtered.filter(row =>
+            keywordProblemIDs.includes(
+                String(row["문제ID"])
+            )
+        );
+
+    }
+
+
+    /* =========================
+       출력
+       ========================= */
+
+    if (selectedKeyword) {
+
+        const keyword = allData["키워드DB"].find(
+            row =>
+                String(row["키워드ID"]).trim() ===
+                String(selectedKeyword).trim()
+        );
+
+
+        displayKeywordPage(
+            keyword,
+            filtered,
+            allData["문제DB"],
+            allData["해설DB"],
+            allData["문제별해설DB"]
+        );
+
+
+    } else {
+
+        displayProblems(
+            filtered,
+            allData["문제DB"],
+            allData["해설DB"],
+            allData["문제별해설DB"]
+        );
+
+    }
 
 }
 
@@ -470,103 +524,53 @@ function createKeywordButtons(subject) {
 }
 
 
-/* =========================
-   키워드 선택 화면
-   ========================= */
-
-function displayKeyword(keyword) {
+function displayKeywordPage(
+    keyword,
+    sheet9,
+    problemDB,
+    explanationDB,
+    individualDB
+) {
 
     const container =
         document.getElementById("problem-list");
-
 
     container.innerHTML = "";
 
 
     /* =========================
-       이론
+       키워드 이론
        ========================= */
 
     const theory =
         document.createElement("div");
 
-
-    theory.className =
-        "explanation";
+    theory.className = "explanation";
 
 
-    theory.innerHTML = `
+    const title =
+        document.createElement("h2");
 
-        <h2>
-            ${keyword["키워드"]}
-        </h2>
+    title.textContent =
+        keyword["키워드"];
 
-        <div class="keyword-theory">
 
-            ${renderTheory(
-                keyword["이론내용"] || ""
-            )}
+    const content =
+        document.createElement("div");
 
-        </div>
+    content.className =
+        "keyword-theory";
 
-    `;
+    content.innerHTML =
+        renderTheory(
+            keyword["이론내용"] || ""
+        );
 
+
+    theory.appendChild(title);
+    theory.appendChild(content);
 
     container.appendChild(theory);
-
-
-    /* =========================
-       해당 키워드 문제 찾기
-       ========================= */
-
-    const keywordID =
-        String(
-            keyword["키워드ID"] || ""
-        ).trim();
-
-
-    const keywordProblemIDs =
-        allData["문제DB"]
-
-            .filter(problem => {
-
-                const ids =
-                    String(
-                        problem["키워드ID"] || ""
-                    )
-                    .split(",")
-                    .map(id =>
-                        id.trim()
-                    );
-
-
-                return ids.includes(
-                    keywordID
-                );
-
-            })
-
-            .map(problem =>
-                String(
-                    problem["문제ID"]
-                )
-            );
-
-
-    /* =========================
-       시트9에서 문제 가져오기
-       ========================= */
-
-    const filtered =
-        allData["시트9"].filter(row => {
-
-            return keywordProblemIDs.includes(
-                String(
-                    row["문제ID"]
-                )
-            );
-
-        });
 
 
     /* =========================
@@ -574,14 +578,33 @@ function displayKeyword(keyword) {
        ========================= */
 
     displayProblems(
-        filtered,
-        allData["문제DB"],
-        allData["해설DB"],
-        allData["문제별해설DB"]
+        sheet9,
+        problemDB,
+        explanationDB,
+        individualDB,
+        true
     );
 
 }
 
+/* =========================
+   키워드 선택 화면
+   ========================= */
+
+function displayKeyword(keyword) {
+
+    selectedKeyword =
+        String(keyword["키워드ID"]).trim();
+
+    // 키워드 처음 클릭하면 전체
+    selectedCounts = ["all"];
+
+    updateCountCheckboxes();
+
+    refreshProblems();
+
+}
+  
 
 /* =========================
    문제 출력
@@ -684,13 +707,7 @@ function displayProblems(
             </div>
 
 
-            <div class="question">
-
-                ${cleanText(
-                    problem["문제만"]
-                )}
-
-            </div>
+            <div class="question">${cleanText(problem["문제만"])}</div>
 
 
             ${
