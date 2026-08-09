@@ -206,12 +206,12 @@ function displayProblems(
                         <h3>공통 해설</h3>
 
                         <div>
-                            ${explanation["공통해설"] || ""}
+                            ${cleanText(explanation["공통해설"])}
                         </div>
 
                         <div class="tip">
                             꿀팁:
-                            ${explanation["꿀팁"] || ""}
+                            ${cleanText(explanation["꿀팁"])}
                         </div>
 
                     </div>
@@ -228,7 +228,7 @@ function displayProblems(
                         <h3>문제별 해설</h3>
 
                         <div>
-                            ${individual["문제별해설"] || ""}
+                            ${cleanText(individual["문제별해설"])}
                         </div>
 
                     </div>
