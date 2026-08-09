@@ -439,32 +439,6 @@ function refreshProblems() {
         );
 
     }
-  if (selectedKeyword) {
-
-    const keyword = allData["키워드DB"].find(
-        row =>
-            String(row["키워드ID"]).trim() ===
-            String(selectedKeyword).trim()
-    );
-
-    displayKeywordPage(
-        keyword,
-        filtered,
-        allData["문제DB"],
-        allData["해설DB"],
-        allData["문제별해설DB"]
-    );
-
-} else {
-
-    displayProblems(
-        filtered,
-        allData["문제DB"],
-        allData["해설DB"],
-        allData["문제별해설DB"]
-    );
-
-  }
   
 
 }
@@ -641,16 +615,19 @@ function displayProblems(
     sheet9,
     problemDB,
     explanationDB,
-    individualDB
+    individualDB,
+    append = false
 ) {
 
     const container =
-        document.getElementById(
-            "problem-list"
-        );
+    document.getElementById(
+        "problem-list"
+    );
 
 
-    container.innerHTML = "";
+   if (!append) {
+      container.innerHTML = "";
+   }
 
 
     sheet9.forEach(row => {
