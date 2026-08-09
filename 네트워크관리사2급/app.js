@@ -163,9 +163,7 @@ function displayProblems(
             </div>
 
 
-            <div class="question">
-                ${cleanText(problem["문제만"])}
-            </div>
+            <div class="question">${cleanText(problem["문제만"])}</div>
 
 
             ${
@@ -205,14 +203,9 @@ function displayProblems(
 
                         <h3>공통 해설</h3>
 
-                        <div>
-                            ${cleanText(explanation["공통해설"])}
-                        </div>
+                        <div>${cleanText(explanation["공통해설"])}</div>
 
-                        <div class="tip">
-                            꿀팁:
-                            ${cleanText(explanation["꿀팁"])}
-                        </div>
+                        <div class="tip">꿀팁: ${cleanText(explanation["꿀팁"])}</div>
 
                     </div>
                 `
@@ -227,9 +220,7 @@ function displayProblems(
 
                         <h3>문제별 해설</h3>
 
-                        <div>
-                            ${cleanText(individual["문제별해설"])}
-                        </div>
+                        <div>${cleanText(individual["문제별해설"])}</div>
 
                     </div>
                 `
